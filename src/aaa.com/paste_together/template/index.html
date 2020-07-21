@@ -1,0 +1,92 @@
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+    <title>Paste Together</title>
+</head>
+<body>
+<h3>Paste Together</h3>
+
+<div>
+    <div style="margin-bottom: 5px;">
+        <label for="newMsg" style="">New Msg：</label>
+    </div>
+    <div style="margin-top: 0;">
+        <textarea id="newMsg" name="msg"
+                  style="margin-top: 0; width:200px; margin-right: 4px; height: 40px; vertical-align: bottom;"></textarea>
+        <button onclick="addMsg()" style="vertical-align: bottom;">Add</button>
+    </div>
+    <div style="margin-top: 6px;">
+        <button onclick="deleteAll()">Clear all messages</button>
+    </div>
+</div>
+
+<div id="content" style="margin-top:10px;">
+    {{.content}}
+</div>
+
+<script>
+    function addMsg() {
+        let msg = document.getElementById('newMsg').value || '';
+        msg = msg.trim();
+        if (!msg) {
+            alert("Message can not be empty");
+            return;
+        }
+        let url = "/api/v1/messages";
+        let params = {"message": msg};
+        fetch(url, {
+            method: 'POST',
+            mode: 'cors',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json; charset=UTF-8'
+            },
+            body: JSON.stringify(params),
+        }).then(function (response) {
+            if (response.status === 201) {
+                response.json().then(data => {
+                    alert("Add Message Successfully");
+                    location.reload();
+                });
+                return;
+            }
+            throw new Error('Network response was not ok.');
+        }).catch(function (error) {
+            console.log(error);
+            alert(error);
+        });
+    }
+
+    function deleteAll() {
+        if (!confirm("Are u sure to clear all messages?")) {
+            return
+        }
+
+        let url = "/api/v1/messages";
+        fetch(url, {
+            method: 'DELETE',
+            mode: 'cors',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json; charset=UTF-8'
+            },
+            // body: JSON.stringify({}),
+        }).then(function (response) {
+            if (response.status === 201) {
+                response.json().then(data => {
+                    alert("Clear Successfully");
+                    location.reload();
+                });
+                return;
+            }
+            throw new Error('Network response was not ok.');
+        }).catch(function (error) {
+            console.log(error);
+            alert(error);
+        });
+    }
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,62 @@
+pipeline {
+    agent any
+	environment {
+		CODE_DIR="code-jenkins-${JOB_NAME}-${BUILD_NUMBER}"
+		GIT_PROJECT_URL="ssh://git@192.168.50.60:22666/zb/first_project.git"
+		BUILD_IMAGE="golang:1.14.5-alpine"
+		OUTPUT_IMAGE="paste_together:${BUILD_NUMBER}"
+	}
+    stages {
+        stage('下载代码') {
+            steps {
+                sh "rm -rf ${CODE_DIR}"
+                sh "mkdir ${CODE_DIR}"
+                dir("${CODE_DIR}") {
+                    git branch: 'master', credentialsId: 'jenkins_id_rsa', url: GIT_PROJECT_URL
+                }
+            }
+        }
+        stage('编译程序') {
+            steps {
+				dir("${CODE_DIR}") {
+					sh "docker run -v ${CODE_DIR}:/project ${BUILD_IMAGE} cd /cicd/build && ./build.sh"
+				}
+            }
+        }
+        stage('打包成Docker镜像') {
+            steps {
+				dir("${CODE_DIR}") {
+					sh "docker build -t ${OUTPUT_IMAGE} -f ${CODE_DIR}/cicd/docker/Dockerfile ."
+
+					// TODO：删除旧的镜像
+					//
+				}
+            }
+        }
+        stage('运行镜像') {
+            steps {
+				dir("${CODE_DIR}") {
+				    sh "docker run -v /data/paste_together:/project/bin/data -p 46699:46699 -d ${OUTPUT_IMAGE}"
+				}
+            }
+        }
+    }
+    post {
+        always {
+            echo 'This will always run'
+        }
+        success {
+            echo 'This will run only if successful'
+        }
+        failure {
+            echo 'This will run only if failed'
+        }
+        unstable {
+            echo 'This will run only if the run was marked as unstable'
+        }
+        changed {
+            echo 'This will run only if the state of the Pipeline has changed'
+            echo 'For example, if the Pipeline was previously failing but is now successful'
+        }
+    }
+}
