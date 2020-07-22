@@ -13,15 +13,23 @@ docker run --name jenkins \
 -p 50000:50000 \
 --cpus=1 \
 -m 512M --memory-swap=1024M \
-jenkins/jenkins:2.245-alpine
+jenkins/jenkins:2.235.2-lts
 
-# 第一次访问，查看 /var/jenkins_home/secrets/initialAdminPassword 找到密码登录，然后选择标准安装
+# 第一次访问，查看 /var/jenkins_home/secrets/initialAdminPassword 找到密码登录
 
-# 安装插件 locale， 装完后语言填写 en-US，并且勾选 xxxxx
+# lts 版不同安装插件，如果要安装，然后选择标准安装
 
-# 新建 Jenkins 密钥信息。
+# 如果显示的是中文，但中文很残缺，就安装 locale 插件，装完后去到 Manage Jenkins - Configure System - Locale 一栏，填写 en-US，并且勾选 Ignore browser preference and force this language to all users
 
-# 新建 pipeline 项目，将 Jenkinsfile 内容复制到 Pipeline 一栏保存。
+# 创建一个用户，并且用这个用户登录和做余下操作。
 
+# 在生成一对密钥，私钥内容填入 Jenkins的 Credentials 中，公钥填入 Gitlab 中。这对密钥保存好。 密钥700
 
+# 新建 pipeline 项目，
+# 在 General Build 中勾上 Do not allow concurrent builds（不允许并发构建）
+# 在 Build Triggers 中勾上 Trigger builds remotely（触发远程构建），填入 Authentication Token，所以触发构建的 url 是 {jenkins_host}/job/{job_name}/build?token={authentication_token}
+# 将 Jenkinsfile 内容复制到 Pipeline 一栏
+# 保存
+
+# 最后就可以执行部署了。
 
