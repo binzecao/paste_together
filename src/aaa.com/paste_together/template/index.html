@@ -32,7 +32,7 @@
             alert("Message can not be empty");
             return;
         }
-        let url = "/api/v1/messages";
+        let url = "api/v1/messages";
         let params = {"message": msg};
         fetch(url, {
             method: 'POST',
@@ -62,7 +62,7 @@
             return
         }
 
-        let url = "/api/v1/messages";
+        let url = "api/v1/messages";
         fetch(url, {
             method: 'DELETE',
             mode: 'cors',

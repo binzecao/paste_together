@@ -37,12 +37,15 @@ pipeline {
             steps {
                 echo "停止、删除之前的容器"
                 sh '''
-                    containerIds=`docker ps -a --format '{{.ID}} {{.Image}}' | grep paste_together: | grep -v paste_together:${BUILD_NUMBER} | awk '{print \$1}'`;
-                    if [ ! -z \$containerIds ]; then docker stop \$containerIds | xargs docker rm; fi
+                    oldContainerIds=`docker ps -a --format '{{.ID}} {{.Image}}' | grep paste_together: | grep -v paste_together:${BUILD_NUMBER} | awk '{print \$1}'`
+                    if [ ! -z \$oldContainerIds ]; then docker stop \$oldContainerIds | xargs docker rm; fi
                 '''
 
                 echo "删除之前生成的镜像"
-                sh "docker images --filter 'reference=paste_together' | grep paste_together | awk '{print \$1, \":\", \$2}' | sed -r 's/ //g' | grep -v :${BUILD_NUMBER}\$ | xargs docker rmi"
+                sh '''
+                    oldImages=`docker images --filter 'reference=paste_together' | grep paste_together | awk '{print \$1, \":\", \$2}' | sed -r 's/ //g' | grep -v :${BUILD_NUMBER}\$`
+                    if [ ! -z \$oldImages ]; then docker rmi \$oldImages; fi
+                '''
 
                 echo "运行最新的镜像"
                 sh "docker run --name=${IMAGE_NAME} --restart=always -v /data/paste_together:/project/data -p 46699:46699 -d ${OUTPUT_IMAGE}"

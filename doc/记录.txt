@@ -9,11 +9,16 @@ chmod 777 /data/jenkins_home
 docker run --name jenkins \
 -d \
 -v /data/jenkins_home:/var/jenkins_home \
+-v /var/run/docker.sock:/var/run/docker.sock \
+-v $(which docker):/usr/bin/docker \
 -p 8082:8080 \
 -p 50000:50000 \
 --cpus=1 \
 -m 512M --memory-swap=1024M \
+-u root \
 jenkins/jenkins:2.235.2-lts
+
+# （这里使用 lts 版本，alpine 版本在 pipeline 中执行 docker 命令会提示：docker: not found，暂时无法解决）
 
 # 第一次访问，查看 /var/jenkins_home/secrets/initialAdminPassword 找到密码登录
 
