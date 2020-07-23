@@ -27,9 +27,13 @@ jenkins/jenkins:2.235.2-lts
 
 # 新建 pipeline 项目，
 # 在 General Build 中勾上 Do not allow concurrent builds（不允许并发构建）
-# 在 Build Triggers 中勾上 Trigger builds remotely（触发远程构建），填入 Authentication Token，所以触发构建的 url 是 {jenkins_host}/job/{job_name}/build?token={authentication_token}
+# 在 Build Triggers 中勾上 Trigger builds remotely（触发远程构建），填入 Authentication Token。
 # 将 Jenkinsfile 内容复制到 Pipeline 一栏
 # 保存
+
+# 由于新版本的 Jenkins 撤销了选项“防止跨站点请求伪造”，调用接口默认都要传输 csrf token，所以要去到用户配置，生成 API Token 。
+
+# 所以最终触发构建的 url 的格式是 {username}:{api_token}@{jenkins_host}:{jenkins_port}/job/{job_name}/build?token={authentication_token}，使用 POST 请求触发。
 
 # 最后就可以执行部署了。
 
